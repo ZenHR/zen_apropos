@@ -30,7 +30,8 @@ module ZenApropos
         changed = `git diff --name-only --diff-filter=ACMR HEAD~1 2>/dev/null`.strip.split("\n")
         changed.select { |f| f.end_with?('.rake') && File.exist?(f) }
       else
-        Dir['lib/tasks/**/*.rake'].sort
+        patterns = ZenApropos.configuration.glob_patterns || Sources::RakeSource::DEFAULT_PATHS
+        patterns.flat_map { |p| Dir[p] }.sort
       end
     end
 
