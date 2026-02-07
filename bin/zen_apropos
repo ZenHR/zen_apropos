@@ -1,0 +1,181 @@
+#!/usr/bin/env ruby
+# ZenApropos CLI — search rake tasks and lint annotations
+#
+# Usage:
+#   zen_apropos <query> [--plain] [--tag TAG]  Search rake tasks
+#   zen_apropos lint [--changed-only] [--tag TAG]  Check for missing annotations
+#   zen_apropos init [--tag TAG]               Generate a project binstub
+#   zen_apropos --help                         Show help
+
+require 'fileutils'
+require 'zen_apropos'
+
+def extract_tag!(args)
+  index = args.index('--tag')
+  return nil unless index
+
+  args.delete_at(index) # remove --tag
+  args.delete_at(index) # remove the value
+end
+
+def apply_tag!(args)
+  tag = extract_tag!(args)
+  ZenApropos.configure { |c| c.tag = tag } if tag
+end
+
+def run_search(args)
+  apply_tag!(args)
+  plain = args.delete('--plain')
+  query = args.join(' ')
+
+  engine = ZenApropos::Engine.new(root_path: Dir.pwd, plain: !!plain)
+
+  if query.empty? || query == '--help' || query == '-h'
+    puts engine.help
+    exit 0
+  end
+
+  output = engine.search(query)
+
+  if output.strip.empty?
+    puts "\n❌ No rake tasks found matching: '#{query}'"
+    puts "\nTry:"
+    puts "  • zen_apropos --help"
+    exit 0
+  end
+
+  puts "\n#{output}\n"
+
+  # Interactive mode (rich mode only)
+  exit 0 if plain
+
+  loop do
+    print "\nEnter a number, new query, or q to quit: "
+    input = $stdin.gets&.strip
+    break if input.nil? || input == 'q' || input.empty?
+
+    if input.match?(/^\d+$/) && engine.last_results&.any?
+      index = input.to_i - 1
+      if index < 0 || index >= engine.last_results.length
+        puts "Invalid number. Enter 1-#{engine.last_results.length}."
+        next
+      end
+
+      entry = engine.last_results[index]
+      puts "\n\e[36m━━━ rake #{entry.name} \e[0m#{'━' * [0, 50 - entry.name.length].max}"
+      puts "  \e[2m#{entry.relative_path}:#{entry.line_number}\e[0m\n\n"
+      puts entry.source
+      puts "\e[36m#{'━' * 58}\e[0m"
+    else
+      output = engine.search(input)
+      if output.strip.empty?
+        puts "\n❌ No rake tasks found matching: '#{input}'"
+      else
+        puts "\n#{output}\n"
+      end
+    end
+  end
+end
+
+def run_lint(args)
+  if args.include?('--help') || args.include?('-h')
+    tag = ZenApropos.configuration.tag
+    puts <<~HELP
+
+      🔍 zen_apropos lint - Rake Task Annotation Linter
+
+      Warns when rake tasks are missing @#{tag} annotations.
+
+      Usage:
+        zen_apropos lint                  # Check all rake files
+        zen_apropos lint --changed-only   # Check only files changed in current branch
+        zen_apropos lint --tag myapp      # Use a custom annotation tag
+
+      Exit codes:
+        0  All tasks have annotations
+        1  Some tasks are missing annotations
+
+    HELP
+    exit 0
+  end
+
+  apply_tag!(args)
+  changed_only = args.include?('--changed-only')
+  exit ZenApropos::Linter.new(changed_only: changed_only).run
+end
+
+def run_init(args)
+  tag = extract_tag!(args) || 'zen'
+  binstub_path = File.join(Dir.pwd, 'bin', 'zen_apropos')
+
+  if File.exist?(binstub_path)
+    puts "#{binstub_path} already exists. Overwrite? [y/N] "
+    answer = $stdin.gets&.strip
+    unless answer&.downcase == 'y'
+      puts 'Aborted.'
+      exit 0
+    end
+  end
+
+  FileUtils.mkdir_p(File.dirname(binstub_path))
+
+  content = <<~RUBY
+    #!/usr/bin/env ruby
+    require 'bundler/setup'
+    require 'zen_apropos'
+
+    ZenApropos.configure do |config|
+      config.tag = '#{tag}'
+    end
+
+    load Gem.bin_path('zen_apropos', 'zen_apropos')
+  RUBY
+
+  File.write(binstub_path, content)
+  File.chmod(0o755, binstub_path)
+
+  puts "Created #{binstub_path} with tag '#{tag}'"
+  puts "Run: bin/zen_apropos <query>"
+end
+
+def show_help
+  puts <<~HELP
+
+    🔍 ZenApropos - Rake Task Search & Lint
+
+    Usage:
+      zen_apropos <query> [--plain] [--tag TAG]  Search rake tasks
+      zen_apropos lint [--changed-only] [--tag TAG]  Check for missing annotations
+      zen_apropos init [--tag TAG]               Generate a project binstub
+      zen_apropos --help                         Show this help
+
+    Search examples:
+      zen_apropos employee
+      zen_apropos "team:finance safety:destructive"
+      zen_apropos reindex --plain
+      zen_apropos --tag myapp employee
+
+    Lint examples:
+      zen_apropos lint
+      zen_apropos lint --changed-only
+      zen_apropos lint --tag myapp
+
+    Setup:
+      zen_apropos init --tag myapp   # creates bin/zen_apropos with tag pre-configured
+
+  HELP
+end
+
+# Route to subcommand
+case ARGV.first
+when 'lint'
+  ARGV.shift
+  run_lint(ARGV)
+when 'init'
+  ARGV.shift
+  run_init(ARGV)
+when '--help', '-h', nil
+  show_help
+else
+  run_search(ARGV.dup)
+end
