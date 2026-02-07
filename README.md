@@ -163,6 +163,7 @@ In an initializer or setup file:
 ```ruby
 ZenApropos.configure do |config|
   config.tag = 'myapp'
+  config.glob_patterns = ['lib/tasks/**/*.rake', 'packages/**/lib/tasks/**/*.rake']
 end
 ```
 
@@ -220,7 +221,15 @@ apropos  # shows help
 
 ## Custom Glob Patterns
 
-By default, zen_apropos scans `lib/tasks/**/*.rake`. For monorepos or apps with tasks in non-standard locations, pass custom patterns:
+By default, zen_apropos scans `lib/tasks/**/*.rake`. For monorepos or apps with tasks in non-standard locations, configure custom patterns:
+
+```ruby
+ZenApropos.configure do |config|
+  config.glob_patterns = ['lib/tasks/**/*.rake', 'packages/**/lib/tasks/**/*.rake']
+end
+```
+
+This works in binstubs, initializers, and anywhere you call `ZenApropos.configure`. The CLI and linter both respect it. You can also pass patterns directly to the engine:
 
 ```ruby
 engine = ZenApropos::Engine.new(

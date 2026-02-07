@@ -28,7 +28,7 @@ def run_search(args)
   plain = args.delete('--plain')
   query = args.join(' ')
 
-  engine = ZenApropos::Engine.new(root_path: Dir.pwd, plain: !!plain)
+  engine = ZenApropos::Engine.new(root_path: Dir.pwd, plain: plain, glob_patterns: ZenApropos.configuration.glob_patterns)
 
   if query.empty? || query == '--help' || query == '-h'
     puts engine.help

@@ -1,9 +1,10 @@
 module ZenApropos
   class Configuration
-    attr_accessor :tag
+    attr_accessor :tag, :glob_patterns
 
     def initialize
-      @tag = 'zen'
+      @tag           = 'zen'
+      @glob_patterns = nil
     end
 
     def tag_pattern
