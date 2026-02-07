@@ -25,12 +25,18 @@ module ZenApropos
     def cache_fresh?
       return false unless File.exist?(cache_path)
 
+      cached = Marshal.load(File.binread(cache_path))
+      return false unless cached.is_a?(Hash) && cached[:glob_patterns] == source.glob_patterns
+
       cache_mtime = File.mtime(cache_path)
       source.scan.none? { |file| File.mtime(file) > cache_mtime }
+    rescue StandardError
+      false
     end
 
     def read_cache
-      Marshal.load(File.binread(cache_path))
+      cached = Marshal.load(File.binread(cache_path))
+      cached[:entries]
     rescue StandardError
       build_and_cache
     end
@@ -39,7 +45,7 @@ module ZenApropos
       all_entries = source.entries
 
       FileUtils.mkdir_p(File.dirname(cache_path))
-      File.binwrite(cache_path, Marshal.dump(all_entries))
+      File.binwrite(cache_path, Marshal.dump({ entries: all_entries, glob_patterns: source.glob_patterns }))
 
       all_entries
     end
