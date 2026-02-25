@@ -13,18 +13,19 @@
 # Calls the original `desc` under the hood so `rake -T` still works
 module ZenApropos
   module ZenDesc
-    # Registry for zen_desc metadata, keyed by description string
-    @registry = {}
+    @pending = nil
 
     class << self
-      attr_reader :registry
-
-      def store(description, metadata)
-        @registry[description] = metadata
+      # Returns and clears the pending metadata set by the last zen_desc call.
+      # Works like Rake's own desc — the next task definition consumes it.
+      def consume
+        meta     = @pending
+        @pending = nil
+        meta || {}
       end
 
-      def lookup(description)
-        @registry[description] || {}
+      def store(metadata)
+        @pending = metadata
       end
     end
   end
@@ -32,6 +33,6 @@ end
 
 # Monkey-patch the zen_desc method into the top-level scope where rake files execute
 def zen_desc(description, **options)
-  ZenApropos::ZenDesc.store(description, options)
+  ZenApropos::ZenDesc.store(options)
   desc description
 end
