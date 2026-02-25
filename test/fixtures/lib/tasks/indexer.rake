@@ -1,7 +1,7 @@
 namespace :indexer do
-  # @zen team: search
-  # @zen safety: safe
-  # @zen keywords: elasticsearch, reindex
+  # @zen_desc team: search
+  # @zen_desc safety: safe
+  # @zen_desc keywords: elasticsearch, reindex
   desc 'Reindex all employees'
   task employees: :environment do
     Employee.reindex
@@ -12,8 +12,8 @@ namespace :indexer do
     Department.reindex
   end
 
-  # @zen team: search
-  # @zen safety: destructive
+  # @zen_desc team: search
+  # @zen_desc safety: destructive
   desc 'Reset all indices'
   task reset_all: :environment do
     Searchkick.models.each do |model|

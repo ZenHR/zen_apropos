@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    zen_apropos (0.1.0)
+    zen_apropos (0.2.0)
 
 GEM
   remote: https://rubygems.org/

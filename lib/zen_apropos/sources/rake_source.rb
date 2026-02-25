@@ -44,7 +44,7 @@ module ZenApropos
         annotation_lines    = []
 
         lines.each_with_index do |line, index|
-          # Collect annotation tags (e.g. # @zen team: ...)
+          # Collect annotation tags (e.g. # @zen_desc team: ...)
           if ZenApropos.configuration.tag_pattern.match?(line)
             annotation_lines << line
             next

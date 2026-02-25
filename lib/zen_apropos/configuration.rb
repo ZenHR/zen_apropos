@@ -3,7 +3,7 @@ module ZenApropos
     attr_accessor :tag, :glob_patterns
 
     def initialize
-      @tag           = 'zen'
+      @tag           = 'zen_desc'
       @glob_patterns = nil
     end
 

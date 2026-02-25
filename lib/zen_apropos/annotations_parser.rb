@@ -1,12 +1,12 @@
 # Parses annotation comment tags from lines preceding a task definition
 #
-# By default, recognizes # @zen tags. Configure with:
+# By default, recognizes # @zen_desc tags. Configure with:
 #   ZenApropos.configure { |c| c.tag = 'myapp' }
 #
 # Supported format:
-#   # @zen team: hr-platform
-#   # @zen safety: caution
-#   # @zen keywords: sync, external, api
+#   # @zen_desc team: hr-platform
+#   # @zen_desc safety: caution
+#   # @zen_desc keywords: sync, external, api
 module ZenApropos
   class AnnotationsParser
     def initialize(lines)

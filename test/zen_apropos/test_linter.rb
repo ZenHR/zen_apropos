@@ -36,7 +36,7 @@ class TestLinter < Minitest::Test
 
   def test_returns_0_when_all_annotated
     exit_code = lint_rake_content('good.rake', <<~RAKE)
-      # @zen team: core
+      # @zen_desc team: core
       desc 'A well annotated task'
       task good: :environment do
       end
