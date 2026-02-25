@@ -15,7 +15,7 @@ module ZenApropos
     end
 
     def entries
-      return read_cache if cache_fresh?
+      return @cached_entries if cache_fresh?
 
       build_and_cache
     end
@@ -28,24 +28,23 @@ module ZenApropos
       cached = Marshal.load(File.binread(cache_path))
       return false unless cached.is_a?(Hash) && cached[:glob_patterns] == source.glob_patterns
 
-      cache_mtime = File.mtime(cache_path)
-      source.scan.none? { |file| File.mtime(file) > cache_mtime }
+      cache_mtime     = File.mtime(cache_path)
+      fresh           = source.scan.none? { |file| File.mtime(file) > cache_mtime }
+      @cached_entries = cached[:entries] if fresh
+      fresh
     rescue StandardError
       false
-    end
-
-    def read_cache
-      cached = Marshal.load(File.binread(cache_path))
-      cached[:entries]
-    rescue StandardError
-      build_and_cache
     end
 
     def build_and_cache
       all_entries = source.entries
 
-      FileUtils.mkdir_p(File.dirname(cache_path))
-      File.binwrite(cache_path, Marshal.dump({ entries: all_entries, glob_patterns: source.glob_patterns }))
+      begin
+        FileUtils.mkdir_p(File.dirname(cache_path))
+        File.binwrite(cache_path, Marshal.dump({ entries: all_entries, glob_patterns: source.glob_patterns }))
+      rescue SystemCallError
+        # Permission error or read-only filesystem — skip caching, return entries
+      end
 
       all_entries
     end
