@@ -2,21 +2,21 @@ require_relative '../test_helper'
 
 class TestAnnotationsParser < Minitest::Test
   def test_parses_team
-    lines  = ["  # @zen team: hr-platform\n"]
+    lines  = ["  # @zen_desc team: hr-platform\n"]
     result = ZenApropos::AnnotationsParser.parse(lines)
 
     assert_equal 'hr-platform', result[:team]
   end
 
   def test_parses_safety
-    lines  = ["  # @zen safety: caution\n"]
+    lines  = ["  # @zen_desc safety: caution\n"]
     result = ZenApropos::AnnotationsParser.parse(lines)
 
     assert_equal 'caution', result[:safety]
   end
 
   def test_parses_keywords
-    lines  = ["  # @zen keywords: sync, permissions, api\n"]
+    lines  = ["  # @zen_desc keywords: sync, permissions, api\n"]
     result = ZenApropos::AnnotationsParser.parse(lines)
 
     assert_equal ['sync', 'permissions', 'api'], result[:keywords]
@@ -24,9 +24,9 @@ class TestAnnotationsParser < Minitest::Test
 
   def test_parses_multiple_annotations
     lines = [
-      "  # @zen team: search\n",
-      "  # @zen safety: safe\n",
-      "  # @zen keywords: elasticsearch, reindex\n"
+      "  # @zen_desc team: search\n",
+      "  # @zen_desc safety: safe\n",
+      "  # @zen_desc keywords: elasticsearch, reindex\n"
     ]
     result = ZenApropos::AnnotationsParser.parse(lines)
 

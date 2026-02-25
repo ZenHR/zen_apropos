@@ -7,7 +7,7 @@ module ZenApropos
     :file_path,   # absolute path to .rake file
     :line_number, # line where task is defined
     :source,      # full source of the task block
-    :annotations, # hash of @zen metadata { team:, safety:, keywords: }
+    :annotations, # hash of @zen_desc metadata { team:, safety:, keywords: }
     :args,        # array of argument names e.g. ["days_ago"]
     keyword_init: true
   ) do

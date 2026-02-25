@@ -1,7 +1,7 @@
 namespace :approvals do
-  # @zen team: hr-platform
-  # @zen safety: caution
-  # @zen keywords: sync, permissions
+  # @zen_desc team: hr-platform
+  # @zen_desc safety: caution
+  # @zen_desc keywords: sync, permissions
   desc 'Synchronize approval permissions'
   task :sync_permissions, [:days_ago] => :environment do |_, args|
     days_ago = args[:days_ago].to_i.nonzero? || 1

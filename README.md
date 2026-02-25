@@ -47,9 +47,9 @@ The linter checks that every `desc`/`task` pair has annotation tags or uses `zen
 Output looks like:
 
 ```
-⚠ lib/tasks/new_feature.rake:12 -- task "new_feature:run" has no @zen annotations
+⚠ lib/tasks/new_feature.rake:12 -- task "new_feature:run" has no @zen_desc annotations
 
-2 task(s) missing annotations. Consider adding @zen tags or using zen_desc.
+2 task(s) missing annotations. Consider adding @zen_desc tags or using zen_desc.
 ```
 
 ### Help
@@ -83,13 +83,13 @@ Every rake task should be annotated with team ownership, safety level, and keywo
 
 ### Option A: Comment Tags
 
-Place annotation lines immediately before the `desc` line. The default tag is `@zen`:
+Place annotation lines immediately before the `desc` line. The default tag is `@zen_desc`:
 
 ```ruby
 namespace :indexer do
-  # @zen team: search
-  # @zen safety: safe
-  # @zen keywords: elasticsearch, reindex
+  # @zen_desc team: search
+  # @zen_desc safety: safe
+  # @zen_desc keywords: elasticsearch, reindex
   desc 'Reindex all employees'
   task employees: :environment do
     Employee.reindex
@@ -130,7 +130,7 @@ require 'zen_apropos/zen_desc'
 
 ## Custom Tag Prefix
 
-By default, zen_apropos recognizes `# @zen` comment tags. If you want a different prefix for your organization:
+By default, zen_apropos recognizes `# @zen_desc` comment tags. If you want a different prefix for your organization:
 
 ### Project setup (recommended)
 
@@ -181,6 +181,8 @@ end
 
 The linter, CLI, and console helper all respect the configured tag.
 
+> **Migrating from `@zen`:** If you previously used `# @zen` tags, either rename them to `# @zen_desc` or set `config.tag = 'zen'` to keep the old prefix.
+
 ## Rails Console Integration
 
 You can define an `apropos` helper for quick searching in the Rails console. Example initializer:
@@ -193,7 +195,7 @@ require 'zen_apropos'
 require 'zen_apropos/zen_desc'
 
 ZenApropos.configure do |config|
-  config.tag = 'myapp' # recognizes # @myapp instead of # @zen
+  config.tag = 'myapp' # recognizes # @myapp instead of # @zen_desc
 end
 
 RAKE_PATHS = ['lib/tasks/**/*.rake'].freeze
