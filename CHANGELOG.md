@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+### Bug Fixes
+
+- **Fixed `--changed-only` diffing against wrong files in CI.** The linter hardcoded `HEAD~1` as the diff base, which in Jenkins PreBuildMerge environments resolved to the PR branch tip — causing the linter to check files from master instead of PR changes.
+
+### New Features
+
+- **`--base REF` flag for the linter.** Allows specifying the git ref to diff against (e.g., `--base origin/master` for CI, `--base --staged` for pre-commit hooks). Defaults to `HEAD~1` for backward compatibility.
+
 ## 0.2.0
 
 ### Breaking Changes

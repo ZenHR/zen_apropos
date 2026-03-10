@@ -7,8 +7,9 @@ module ZenApropos
   class Linter
     attr_reader :warnings
 
-    def initialize(changed_only: false)
+    def initialize(changed_only: false, base: nil)
       @changed_only = changed_only
+      @base         = base
       @warnings     = []
     end
 
@@ -27,7 +28,8 @@ module ZenApropos
 
     def rake_files
       if @changed_only
-        changed = `git diff --name-only --diff-filter=ACMR HEAD~1 2>/dev/null`.strip.split("\n")
+        reference = @base || 'HEAD~1'
+        changed   = `git diff --name-only --diff-filter=ACMR #{reference} 2>/dev/null`.strip.split("\n")
         changed.select { |f| f.end_with?('.rake') && File.exist?(f) }
       else
         patterns = ZenApropos.configuration.glob_patterns || Sources::RakeSource::DEFAULT_PATHS

@@ -77,6 +77,14 @@ def run_search(args)
   end
 end
 
+def extract_base!(args)
+  index = args.index('--base')
+  return nil unless index
+
+  args.delete_at(index) # remove --base
+  args.delete_at(index) # remove the value
+end
+
 def run_lint(args)
   if args.include?('--help') || args.include?('-h')
     tag = ZenApropos.configuration.tag
@@ -89,6 +97,7 @@ def run_lint(args)
       Usage:
         zen_apropos lint                  # Check all rake files
         zen_apropos lint --changed-only   # Check only files changed in current branch
+        zen_apropos lint --base REF       # Use REF as the base for diff (default: HEAD~1)
         zen_apropos lint --tag myapp      # Use a custom annotation tag
 
       Exit codes:
@@ -100,8 +109,9 @@ def run_lint(args)
   end
 
   apply_tag!(args)
+  base         = extract_base!(args)
   changed_only = args.include?('--changed-only')
-  exit ZenApropos::Linter.new(changed_only: changed_only).run
+  exit ZenApropos::Linter.new(changed_only: changed_only, base: base).run
 end
 
 def run_init(args)
